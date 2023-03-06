@@ -111,17 +111,25 @@ class Classification():
 
         self.X = self.final_df[self.args.training_columns.split(",")]
         self.y = self.final_df[[self.args.target_column]]
-
-        X_train,X_test,y_train,y_test=train_test_split(self.X,self.y,test_size=1-self.args.train_size,random_state=self.random_state)
+        self.penalty='none'
 
         config = self.read_params(self.args.config)
+        # X_train,X_test,y_train,y_test=train_test_split(self.X,self.y,test_size=1-self.args.train_size,random_state=self.random_state)
+        if 'train_size' in config['split_data']:
+            self.args.train_size=config['split_data']['train_size']
+        if 'random_state' in config['estimators']['lr_training']['params']:
+            self.random_state=config['estimators']['lr_training']['params']['random_state']
+        if 'penalty' in config['estimators']['lr_training']['params']:
+            self.penalty=config['estimators']['lr_training']['params']['penalty']
+        X_train,X_test,y_train,y_test=train_test_split(self.X,self.y,test_size=1-self.args.train_size,random_state=self.random_state)
+
         mlflow_config = config["mlflow_config"]
         run_name = mlflow_config["run_name"]
         mlflow.set_tracking_uri(mlflow_config["remote_server_uri"])
         mlflow.set_experiment(mlflow_config["experiment_name"])
 
         with mlflow.start_run(run_name=run_name) as mlops_run:
-            model = LogisticRegression(penalty='l2', random_state=self.random_state)
+            model = LogisticRegression(penalty=self.penalty, random_state=self.random_state)
             model.fit(X_train,y_train)
 
             # 5 Cross-validation

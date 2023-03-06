@@ -6,6 +6,8 @@ name: Python application
 on:
   workflow_dispatch:
     branches: ["main"]
+  push:
+    branches: ["main"]
 
 permissions: write-all
 
@@ -47,7 +49,7 @@ jobs:
       run: |
         # commit new trained model in mlflow db
         git config --global user.name 'Niket Zagade'
-        git config --global user.email 'niketzagade198@gmail.com'
+        git config --global user.email 'niket.zagade@atos.net'
         git add .
         git commit -m "Automated report"
         git push
